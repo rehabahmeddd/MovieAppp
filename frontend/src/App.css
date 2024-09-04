@@ -1,0 +1,328 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Global styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #121212;
+  color: #e0e0e0; 
+}
+
+/* Login Page Styles */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #1e1e1e; 
+  color: #fff; 
+}
+
+.login-container h2 {
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #333;
+  color: #fff;
+}
+
+button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.error {
+  color: #ff4d4d;
+}
+
+/* SearchBar styles */
+.search-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px;
+  gap: 10px;
+  flex-wrap: wrap; 
+  background-color: #1e1e1e; 
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.search-input, .search-select {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #333; 
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: #333; 
+  color: #e0e0e0; 
+}
+
+.search-input {
+  width: 100%;
+  max-width: 300px; 
+}
+
+.search-select {
+  width: 100%;
+  max-width: 150px; 
+}
+
+.search-logo {
+  height: 40px; 
+  margin-right: 16px; 
+}
+
+@media (min-width: 600px) {
+  .search-bar {
+    flex-direction: row;
+  }
+}
+
+/* Movie list styles */
+.movie-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 16px;
+}
+
+.movie-card {
+  position: relative;
+  margin: 16px;
+  width: 100%;
+  max-width: 250px; 
+  box-sizing: border-box;
+  text-align: center;
+  border-radius: 8px; 
+  overflow: hidden; 
+  transition: transform 0.3s ease, box-shadow 0.3s ease; 
+  border: 2px solid #444; 
+  background-color: #1e1e1e; 
+}
+
+.movie-card:hover {
+  transform: scale(1.05); 
+  border-color: #666; 
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); 
+}
+
+.movie-card img {
+  width: 100%;
+  height: auto; 
+}
+
+.movie-info {
+  padding: 10px;
+}
+
+/* Title style */
+.movie-card h2 {
+  font-size: 16px; 
+  margin: 10px 0; 
+  font-weight: bold; 
+  color: #e0e0e0; 
+  text-decoration: none; 
+}
+
+/* Movie details under the title */
+.movie-genre,
+.movie-release-date,
+.movie-rating {
+  font-size: 14px; 
+  margin: 5px 0; 
+  color: #aaa; 
+  text-decoration: none; 
+}
+
+/* Ensure no default link styles */
+.movie-card a {
+  text-decoration: none; 
+  color: inherit; 
+}
+
+/* Movie Detail specific styles */
+.movie-detail {
+  display: flex;
+  flex-direction: row;
+  padding: 20px;
+  text-align: left;
+  gap: 20px; 
+  background-color: #1e1e1e;
+}
+
+.movie-poster {
+  width: 400px; 
+  height: auto; 
+  border-radius: 8px;
+  margin-right: 20px;
+}
+
+.movie-info {
+  max-width: 700px; 
+}
+
+.movie-info h1 {
+  margin-top: 0; 
+  color: #e0e0e0; 
+}
+
+.movie-info p {
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 10px 0; 
+  color: #e0e0e0; 
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .movie-detail {
+    flex-direction: column; 
+    align-items: center; 
+  }
+
+  .movie-poster {
+    width: 100%; 
+    max-width: 500px; 
+    margin-right: 0; 
+    margin-bottom: 20px; 
+  }
+
+  .movie-info {
+    text-align: center; 
+  }
+}
+
+/* SortingBar styles */
+.sorting-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px;
+  gap: 10px; 
+}
+
+.sorting-label {
+  font-size: 16px;
+  margin-right: 10px; 
+}
+
+.sorting-select {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #333; 
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: #333; 
+  color: #e0e0e0; 
+}
+
+@media (min-width: 600px) {
+  .sorting-bar {
+    justify-content: flex-start; 
+  }
+
+  .sorting-select {
+    max-width: 200px; 
+  }
+}
+/*favorite button*/
+.favorite-button {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #555; 
+  transition: color 0.3s ease;
+}
+
+.favorite-button.favorite {
+  color: gold; 
+}
+
+.favorite-button.not-favorite {
+  color: #555; 
+}
+
+.favorite-button:hover {
+  color: #ff0; 
+}
+
+.toggle-favorites {
+  margin: 10px 0;
+}
+
+.toggle-button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-button:hover {
+  background-color: #0056b3;
+}
