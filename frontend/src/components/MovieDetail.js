@@ -55,7 +55,7 @@ const MovieDetail = () => {
         <p><strong>Rating:</strong> {movie.rating}</p>
         <p><strong>Description:</strong> {movie.description}</p>
         <p><strong>Director:</strong> {movie.director}</p>
-        <p><strong>Actors:</strong> {movie.actors.join(', ')}</p>
+        <p><strong>Actors:</strong> {movie.actors}</p>
         <button 
           onClick={handleFavoriteToggle} 
           className={`favorite-button ${isFavorite ? 'favorite' : 'not-favorite'}`}
