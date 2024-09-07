@@ -17,8 +17,10 @@ const MovieDetail = () => {
         setMovie(response.data);
 
         // Check if the movie is already a favorite
-        const favResponse = await axios.get('http://localhost:3000/api/favorites');
-        setIsFavorite(favResponse.data.some(m => m.id === response.data.id));
+        const favResponse = await axios.get(`http://localhost:3000/api/favorites/isFavorite`, {
+          params: { movieId: id }
+        });
+        setIsFavorite(favResponse.data.isFavorite);
       } catch (error) {
         console.error('Error fetching movie details:', error);
       }

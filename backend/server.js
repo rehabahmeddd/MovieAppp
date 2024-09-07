@@ -112,6 +112,103 @@ app.get('/api/movies', (req, res) => {
   );
 });
 
+// get movies by genre endpoint
+app.get('/api/movies/genre', (req, res) => {
+  const { genre, page = 1, limit = 10 } = req.query;
+  const pageNumber = parseInt(page, 10);
+  const pageSize = parseInt(limit, 10);
+
+  if (!genre) {
+      return res.status(400).send('Genre query parameter is required');
+  }
+
+  if (isNaN(pageNumber) || pageNumber < 1 || isNaN(pageSize) || pageSize < 1) {
+      return res.status(400).send('Invalid pagination parameters');
+  }
+
+  const startIndex = (pageNumber - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  // Query to get movies by genre with pagination
+  connection.query(
+      `SELECT * FROM movies WHERE genre LIKE ? LIMIT ?, ?`,
+      [`%${genre}%`, startIndex, pageSize],
+      (err, rows) => {
+          if (err) {
+              console.log('Error while getting movies by genre from database.');
+              return res.status(500).send('Error while fetching movies');
+          }
+
+          // Get the total count of movies for the genre
+          connection.query('SELECT COUNT(*) AS total FROM movies WHERE genre LIKE ?', [`%${genre}%`], (countErr, countRows) => {
+              if (countErr) {
+                  console.log('Error while getting total movies count for the genre.');
+                  return res.status(500).send('Error while fetching movies count');
+              }
+
+              const totalMovies = countRows[0].total;
+
+              res.json({
+                  page: pageNumber,
+                  limit: pageSize,
+                  totalMovies,
+                  totalPages: Math.ceil(totalMovies / pageSize),
+                  movies: rows
+              });
+          });
+      }
+  );
+});
+
+// get movies by title endpoint
+app.get('/api/movies/title', (req, res) => {
+  const { title, page = 1, limit = 10 } = req.query;
+  const pageNumber = parseInt(page, 10);
+  const pageSize = parseInt(limit, 10);
+
+  if (!title) {
+      return res.status(400).send('Title query parameter is required');
+  }
+
+  if (isNaN(pageNumber) || pageNumber < 1 || isNaN(pageSize) || pageSize < 1) {
+      return res.status(400).send('Invalid pagination parameters');
+  }
+
+  const startIndex = (pageNumber - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  // Query to get movies by title with pagination
+  connection.query(
+      `SELECT * FROM movies WHERE title LIKE ? LIMIT ?, ?`,
+      [`%${title}%`, startIndex, pageSize],
+      (err, rows) => {
+          if (err) {
+              console.log('Error while getting movies by title from database.');
+              return res.status(500).send('Error while fetching movies');
+          }
+
+          // get the total count of movies matching the title
+          connection.query('SELECT COUNT(*) AS total FROM movies WHERE title LIKE ?', [`%${title}%`], (countErr, countRows) => {
+              if (countErr) {
+                  console.log('Error while getting total movies count for the title.');
+                  return res.status(500).send('Error while fetching movies count');
+              }
+
+              const totalMovies = countRows[0].total;
+
+              res.json({
+                  page: pageNumber,
+                  limit: pageSize,
+                  totalMovies,
+                  totalPages: Math.ceil(totalMovies / pageSize),
+                  movies: rows
+              });
+          });
+      }
+  );
+});
+
+
 // get a movie by ID endpoint
 app.get('/api/movies/:id', (req, res) => {
   const movieId = parseInt(req.params.id);
@@ -135,7 +232,7 @@ app.get('/api/movies/:id', (req, res) => {
 
 
 // get favorite movies
-app.get('/api/favorites', authenticateJWT, (req, res) => {
+/*app.get('/api/favorites', authenticateJWT, (req, res) => {
   const userId = req.user.id;
 
   connection.query(
@@ -150,6 +247,170 @@ app.get('/api/favorites', authenticateJWT, (req, res) => {
           }
 
           res.json(rows);
+      }
+  );
+});*/
+
+// get favorite movies with pagination
+app.get('/api/favorites', authenticateJWT, (req, res) => {
+  const userId = req.user.id;
+  const { page = 1, limit = 10 } = req.query;
+  const pageNumber = parseInt(page, 10);
+  const pageSize = parseInt(limit, 10);
+
+  if (isNaN(pageNumber) || pageNumber < 1 || isNaN(pageSize) || pageSize < 1) {
+      return res.status(400).send('Invalid pagination parameters');
+  }
+
+  const startIndex = (pageNumber - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  // Query to get paginated favorite movies
+  connection.query(
+      `SELECT * FROM movies m
+       INNER JOIN favs f ON m.id = f.movie_id
+       WHERE f.user_id = ?
+       LIMIT ?, ?`,
+      [userId, startIndex, pageSize],
+      (err, rows) => {
+          if (err) {
+              console.log('Error while getting paginated favorite movies from database.');
+              return res.status(500).send('Error while fetching favorite movies');
+          }
+
+          // Get the total count of favorite movies
+          connection.query(
+              'SELECT COUNT(*) AS total FROM favs WHERE user_id = ?',
+              [userId],
+              (countErr, countRows) => {
+                  if (countErr) {
+                      console.log('Error while getting total count of favorite movies.');
+                      return res.status(500).send('Error while fetching favorite movies count');
+                  }
+
+                  const totalFavorites = countRows[0].total;
+
+                  res.json({
+                      page: pageNumber,
+                      limit: pageSize,
+                      totalFavorites,
+                      totalPages: Math.ceil(totalFavorites / pageSize),
+                      movies: rows
+                  });
+              }
+          );
+      }
+  );
+});
+
+// Get favorite movies by genre with pagination
+app.get('/api/favorites/genre', authenticateJWT, (req, res) => {
+  const userId = req.user.id;
+  const { genre, page = 1, limit = 10 } = req.query;
+  const pageNumber = parseInt(page, 10);
+  const pageSize = parseInt(limit, 10);
+
+  if (!genre) {
+      return res.status(400).send('Genre query parameter is required');
+  }
+
+  if (isNaN(pageNumber) || pageNumber < 1 || isNaN(pageSize) || pageSize < 1) {
+      return res.status(400).send('Invalid pagination parameters');
+  }
+
+  const startIndex = (pageNumber - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  // Query to get favorite movies by genre with pagination
+  connection.query(
+      `SELECT * FROM movies m
+       INNER JOIN favs f ON m.id = f.movie_id
+       WHERE f.user_id = ? AND m.genre LIKE ?
+       LIMIT ?, ?`,
+      [userId, `%${genre}%`, startIndex, pageSize],
+      (err, rows) => {
+          if (err) {
+              console.log('Error while getting favorite movies by genre from database.');
+              return res.status(500).send('Error while fetching favorite movies');
+          }
+
+          // Get the total count of favorite movies for the genre
+          connection.query(
+              'SELECT COUNT(*) AS total FROM favs f INNER JOIN movies m ON f.movie_id = m.id WHERE f.user_id = ? AND m.genre LIKE ?',
+              [userId, `%${genre}%`],
+              (countErr, countRows) => {
+                  if (countErr) {
+                      console.log('Error while getting total count of favorite movies by genre.');
+                      return res.status(500).send('Error while fetching favorite movies count');
+                  }
+
+                  const totalFavorites = countRows[0].total;
+
+                  res.json({
+                      page: pageNumber,
+                      limit: pageSize,
+                      totalFavorites,
+                      totalPages: Math.ceil(totalFavorites / pageSize),
+                      movies: rows
+                  });
+              }
+          );
+      }
+  );
+});
+
+// Get favorite movies by title with pagination
+app.get('/api/favorites/title', authenticateJWT, (req, res) => {
+  const userId = req.user.id;
+  const { title, page = 1, limit = 10 } = req.query;
+  const pageNumber = parseInt(page, 10);
+  const pageSize = parseInt(limit, 10);
+
+  if (!title) {
+      return res.status(400).send('Title query parameter is required');
+  }
+
+  if (isNaN(pageNumber) || pageNumber < 1 || isNaN(pageSize) || pageSize < 1) {
+      return res.status(400).send('Invalid pagination parameters');
+  }
+
+  const startIndex = (pageNumber - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  // Query to get favorite movies by title with pagination
+  connection.query(
+      `SELECT * FROM movies m
+       INNER JOIN favs f ON m.id = f.movie_id
+       WHERE f.user_id = ? AND m.title LIKE ?
+       LIMIT ?, ?`,
+      [userId, `%${title}%`, startIndex, pageSize],
+      (err, rows) => {
+          if (err) {
+              console.log('Error while getting favorite movies by title from database.');
+              return res.status(500).send('Error while fetching favorite movies');
+          }
+
+          // Get the total count of favorite movies for the title
+          connection.query(
+              'SELECT COUNT(*) AS total FROM favs f INNER JOIN movies m ON f.movie_id = m.id WHERE f.user_id = ? AND m.title LIKE ?',
+              [userId, `%${title}%`],
+              (countErr, countRows) => {
+                  if (countErr) {
+                      console.log('Error while getting total count of favorite movies by title.');
+                      return res.status(500).send('Error while fetching favorite movies count');
+                  }
+
+                  const totalFavorites = countRows[0].total;
+
+                  res.json({
+                      page: pageNumber,
+                      limit: pageSize,
+                      totalFavorites,
+                      totalPages: Math.ceil(totalFavorites / pageSize),
+                      movies: rows
+                  });
+              }
+          );
       }
   );
 });
@@ -215,6 +476,32 @@ app.delete('/api/favorites/:id', authenticateJWT, (req, res) => {
 
           res.status(200).send('Movie removed from favorites');
       }
+  );
+});
+
+
+// Check if a movie is in the user's favorites list
+app.get('/api/favorites/isFavorite', authenticateJWT, (req, res) => {
+  const userId = req.user.id;
+  const { movieId } = req.query;
+
+  if (!movieId) {
+    return res.status(400).send('Movie ID query parameter is required');
+  }
+
+  // Query to check if the movie is in the user's favorites list
+  connection.query(
+    `SELECT COUNT(*) AS count FROM favs WHERE user_id = ? AND movie_id = ?`,
+    [userId, movieId],
+    (err, results) => {
+      if (err) {
+        console.log('Error while checking if movie is a favorite.');
+        return res.status(500).send('Error while checking favorite status');
+      }
+
+      const isFavorite = results[0].count > 0;
+      res.json({ isFavorite });
+    }
   );
 });
 

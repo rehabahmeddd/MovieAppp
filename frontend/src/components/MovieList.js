@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import MovieCard from './MovieCard';
 import SearchBar from './SearchBar';
@@ -14,34 +14,35 @@ const MovieList = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  //const [moviesPerPage, setMoviesPerPage] = useState(10);
-  const moviesPerPage= 10;
-
+  const moviesPerPage = 10;
 
   const getAuthToken = () => localStorage.getItem('token');
 
- 
-  const setAuthHeader = React.useCallback(() => {
+  const setAuthHeader = useCallback(() => {
     const token = getAuthToken();
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } else {
       delete axios.defaults.headers.common['Authorization'];
     }
-  }, []); 
+  }, []);
 
- //fetch all movies
+  // Fetch movies or favorite movies based on search term and state
   useEffect(() => {
     setAuthHeader(); 
 
     const fetchMovies = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/movies', {
+        const response = await axios.get(
+          `http://localhost:3000/api/movies${searchTerm && searchBy === 'genre' ? '/genre' : searchTerm && searchBy === 'title' ? '/title' : ''}`, {
           params: {
             page: currentPage,
-            limit: moviesPerPage
+            limit: moviesPerPage,
+            ...(searchTerm && searchBy === 'genre' && { genre: searchTerm }),
+            ...(searchTerm && searchBy === 'title' && { title: searchTerm })
           }
         });
+
         setMovies(response.data.movies);
         setTotalPages(response.data.totalPages);
       } catch (error) {
@@ -49,29 +50,35 @@ const MovieList = () => {
       }
     };
 
-    fetchMovies();
-  }, [setAuthHeader, currentPage, moviesPerPage]);
-
-//fetch fav movies
-  useEffect(() => {
-    setAuthHeader(); 
-
     const fetchFavoriteMovies = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/favorites');
-        setFavoriteMovies(response.data);
+        const response = await axios.get(
+          `http://localhost:3000/api/favorites${searchTerm && searchBy === 'genre' ? '/genre' : searchTerm && searchBy === 'title' ? '/title' : ''}`, {
+          params: {
+            page: currentPage,
+            limit: moviesPerPage,
+            ...(searchTerm && searchBy === 'genre' && { genre: searchTerm }),
+            ...(searchTerm && searchBy === 'title' && { title: searchTerm })
+          }
+        });
+
+        setFavoriteMovies(response.data.movies || response.data); // Adjust response handling if needed
+        setTotalPages(response.data.totalPages); // Assuming your API returns totalPages
       } catch (error) {
         console.error('Error fetching favorite movies:', error);
       }
     };
 
-    fetchFavoriteMovies();
-  }, [setAuthHeader, showFavorites]);
+    if (showFavorites) {
+      fetchFavoriteMovies();
+    } else {
+      fetchMovies();
+    }
+  }, [setAuthHeader, currentPage, showFavorites, searchTerm, searchBy]);
 
- 
   const movieList = showFavorites ? favoriteMovies : movies;
 
- //sorting
+  // Sorting
   const sortedMovies = [...movieList].sort((a, b) => {
     if (sortBy === 'rating') {
       return b.rating - a.rating;
@@ -82,17 +89,7 @@ const MovieList = () => {
     }
   });
 
-  //filtering
-  const filteredMovies = sortedMovies.filter(movie => {
-    if (searchBy === 'title') {
-      return movie.title.toLowerCase().includes(searchTerm.toLowerCase());
-    } else if (searchBy === 'genre') {
-      return movie.genre.toLowerCase().includes(searchTerm.toLowerCase());
-    }
-    return true;
-  });
-
- //pagination
+  // Pagination
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
@@ -120,7 +117,7 @@ const MovieList = () => {
         </button>
       </div>
       <div className="movie-list">
-        {filteredMovies.map(movie => (
+        {sortedMovies.map(movie => (
           <MovieCard key={movie.id} movie={movie} />
         ))}
       </div>
