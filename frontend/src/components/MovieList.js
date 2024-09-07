@@ -9,6 +9,7 @@ const MovieList = () => {
   const [favoriteMovies, setFavoriteMovies] = useState([]);
   const [showFavorites, setShowFavorites] = useState(false); 
   const [sortBy, setSortBy] = useState('title'); 
+  const [sortOrder, setSortOrder] = useState('asc'); 
   const [searchTerm, setSearchTerm] = useState('');
   const [searchBy, setSearchBy] = useState('title'); 
 
@@ -27,7 +28,6 @@ const MovieList = () => {
     }
   }, []);
 
-  // Fetch movies or favorite movies based on search term and state
   useEffect(() => {
     setAuthHeader(); 
 
@@ -38,6 +38,8 @@ const MovieList = () => {
           params: {
             page: currentPage,
             limit: moviesPerPage,
+            sortBy,
+            sortOrder,
             ...(searchTerm && searchBy === 'genre' && { genre: searchTerm }),
             ...(searchTerm && searchBy === 'title' && { title: searchTerm })
           }
@@ -57,13 +59,15 @@ const MovieList = () => {
           params: {
             page: currentPage,
             limit: moviesPerPage,
+            sortBy,
+            sortOrder,
             ...(searchTerm && searchBy === 'genre' && { genre: searchTerm }),
             ...(searchTerm && searchBy === 'title' && { title: searchTerm })
           }
         });
 
-        setFavoriteMovies(response.data.movies || response.data); // Adjust response handling if needed
-        setTotalPages(response.data.totalPages); // Assuming your API returns totalPages
+        setFavoriteMovies(response.data.movies || response.data);
+        setTotalPages(response.data.totalPages);
       } catch (error) {
         console.error('Error fetching favorite movies:', error);
       }
@@ -74,22 +78,12 @@ const MovieList = () => {
     } else {
       fetchMovies();
     }
-  }, [setAuthHeader, currentPage, showFavorites, searchTerm, searchBy]);
+  }, [setAuthHeader, currentPage, showFavorites, searchTerm, searchBy, sortBy, sortOrder]);
 
   const movieList = showFavorites ? favoriteMovies : movies;
 
-  // Sorting
-  const sortedMovies = [...movieList].sort((a, b) => {
-    if (sortBy === 'rating') {
-      return b.rating - a.rating;
-    } else if (sortBy === 'release_year') {
-      return b.release_year - a.release_year;
-    } else {
-      return a.title.localeCompare(b.title);
-    }
-  });
+  // Sorting handled by backend, so no need to sort here
 
-  // Pagination
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
@@ -110,6 +104,14 @@ const MovieList = () => {
           <option value="release_year">Release Year</option>
           <option value="rating">Rating</option>
         </select>
+        <select
+          onChange={(e) => setSortOrder(e.target.value)}
+          value={sortOrder}
+          className="sorting-select"
+        >
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
       </div>
       <div className="toggle-favorites">
         <button onClick={() => setShowFavorites(!showFavorites)} className="toggle-button">
@@ -117,7 +119,7 @@ const MovieList = () => {
         </button>
       </div>
       <div className="movie-list">
-        {sortedMovies.map(movie => (
+        {movieList.map(movie => (
           <MovieCard key={movie.id} movie={movie} />
         ))}
       </div>
